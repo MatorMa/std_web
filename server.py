@@ -83,13 +83,6 @@ def sign_up(u:user_data):
         raise HTTPException(status_code=400, detail="用户名已被占用")
     return {"ok":True}
 
-# @app.get("/api/users")
-# def list_users():
-#     conn = sqlite3.connect("blog.db")
-#     users = conn.execute("SELECT id, username, password_hash, salt FROM users").fetchall()
-#     conn.close()
-#     return [{"id": u[0], "username": u[1], "password_hash": u[2], "salt": u[3]}  for u in users]
-
 
 session = {}
 @app.post("/api/login")
