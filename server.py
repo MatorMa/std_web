@@ -22,7 +22,7 @@ conn.execute("""
 conn.commit()
 conn.close()
 
-app = FastAPI()
+app = FastAPI(docs=None, redoc=None, openapi_url=None)
 
 from fastapi.middleware.cors import CORSMiddleware
 
