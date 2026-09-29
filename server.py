@@ -26,12 +26,6 @@ app = FastAPI()
 
 from fastapi.middleware.cors import CORSMiddleware
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 @app.get("/api/articles")
 def get_articles():
@@ -89,12 +83,12 @@ def sign_up(u:user_data):
         raise HTTPException(status_code=400, detail="用户名已被占用")
     return {"ok":True}
 
-@app.get("/api/users")
-def list_users():
-    conn = sqlite3.connect("blog.db")
-    users = conn.execute("SELECT id, username, password_hash, salt FROM users").fetchall()
-    conn.close()
-    return [{"id": u[0], "username": u[1], "password_hash": u[2], "salt": u[3]}  for u in users]
+# @app.get("/api/users")
+# def list_users():
+#     conn = sqlite3.connect("blog.db")
+#     users = conn.execute("SELECT id, username, password_hash, salt FROM users").fetchall()
+#     conn.close()
+#     return [{"id": u[0], "username": u[1], "password_hash": u[2], "salt": u[3]}  for u in users]
 
 
 session = {}
