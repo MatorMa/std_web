@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+     <style>
+    .box {
+     display: flex;
+     align-items: center;
+      height: 60px;
+      gap: 20px;
+      border-bottom: 2px solid black;
+      background: lightblue;
+      box-sizing: border-box;
+      justify-content: space-between;
+    }
+    .master{
+        display: flex;
+        height: calc(100vh - 60px);
+        align-items: center;
+        flex-direction:column;
+        box-sizing: border-box;
+        gap: 20px;
+        justify-content: center;
+
+    }
+    .list{
+        display: flex;
+        height: auto;
+        width: auto;
+        border: 2px solid #1a1a2e;
+        flex-direction: column;
+
+    }
+    .read{
+        background: teal;
+    }
+    .me{
+        border: 2px solid black;
+        background: transparent;
+    }
+    body{
+        margin : 0px;
+    }
+    .h{
+        margin: 0%;
+        font-size: 48px;
+    }
+    .p{
+        margin: 0%;
+    }
+    .master.dark{
+        background: #1a1a2e;
+
+    }
+  </style>
+</head>
+<body>
+<nav class="box">
+    MYLOGO 
+    <a href="#">首页</a>
+    <a href="#">文章</a>
+    <a href="#">关于我</a>
+<button class = "wit">夜间模式</button>
+<input class="ue" placeholder="账号">
+<input class="password" placeholder="密码">
+<button class="login_bn">登录</button>
+<button class="login_out">退出</button>
+</nav>
+ <section class = "master">
+    <h1 class="h">我 的 小 站</h1>
+    <p class="p">记录学习，也记录踩过的坑</p>
+    
+    <div>
+        <button class="read">
+            开始阅读
+        </button>
+        <button class="me">
+            了解我
+        </button>
+    </div>
+
+</section>
+<input class="new-title" placeholder="文章标题"><button class="put_word">+</button>
+<div class="list"></div>
+
+<script>
+    let currentUser = null
+    
+    let articles = [];
+
+        async function load() {
+            const res = await fetch("/api/articles");
+            articles = await res.json();
+            render();
+        }
+        load();
+
+    const data_div = document.querySelector(".list");
+    
+    const meBtn = document.querySelector(".me");
+    meBtn.addEventListener("click",function(){meBtn.style.backgroundColor="black"})
+    
+    const meAtn = document.querySelector(".read");
+    let n = 0;
+    meAtn.addEventListener("click",function(){ n+=1; document.querySelector(".p").textContent=`好戏开始了(第${n}次)`;});
+    
+    const meCtn = document.querySelector(".wit");
+    meCtn.addEventListener("click",function(){document.querySelector(".master").classList.toggle("dark")});
+    
+    // 发表文章
+    const meDtn = document.querySelector(".put_word");
+    meDtn.addEventListener("click",async function(){
+        let new_word ={"title":document.querySelector(".new-title").value,
+        "summary":"测试",
+        "date":new Date().toLocaleDateString(),
+        
+       };
+       const push = await fetch("/api/articles",{
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(new_word),
+            });
+            load();
+    })
+
+    // 登录
+    const meEtn = document.querySelector(".login_bn")
+    meEtn.addEventListener("click",async function(){
+        let user_data = {username: document.querySelector(".ue").value,password: document.querySelector(".password").value};
+        const login = await fetch("/api/login",{
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(user_data),
+        });
+        login_status = await login.json();
+        if (!login_status.ok){
+            console.log("用户名或密码错误");
+            return;
+        }
+        meEtn.textContent= document.querySelector(".ue").value
+        currentUser = user_data.username
+    })
+
+    function render(){
+        data_div.innerHTML = "";
+        for (let i = 0; i < articles.length; i++){
+        data_div.innerHTML += `<h3>${articles[i].title}</h3>`;
+        data_div.innerHTML += `<p>${articles[i].summary}</p>`;
+        data_div.innerHTML += `<p>${articles[i].date}</p>`;
+        data_div.innerHTML += `<p>作者：${articles[i].author}</p>`
+        if (articles[i].author === currentUser){
+            data_div.innerHTML += `<button class="del">删除</button>`;
+        }
+        };
+        // 删除
+        const delBtns = document.querySelectorAll(".del");
+        for (let i = 0; i < delBtns.length;i++){
+            const id = articles[i].id;
+            delBtns[i].addEventListener("click",async function(){
+                console.log(`我要删除第${i}篇`);
+                await fetch(`/api/articles/${id}`,{method: "DELETE"});
+                load();
+            })
+        }
+    }
+
+    async function checkLogin(){
+        const cc_login = await fetch("/api/me");
+        user_data = await cc_login.json();
+        if (user_data.username){
+            console.log(`当前用户：${user_data.username}`)
+            meEtn.textContent= user_data.username
+            currentUser = user_data.username
+        }
+        
+    };
+    checkLogin();
+    const meFtn = document.querySelector(".login_out")
+    meFtn.addEventListener("click",loginOut)
+     async function loginOut(){
+        const cc_login = await fetch("/api/logout",{
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body:"",
+        });
+    meEtn.textContent = "登录"
+    };
+    
+</script>
+</body> 
+
+</html>
